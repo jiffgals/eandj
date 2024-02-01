@@ -1,0 +1,280 @@
+Creating Database (mySQL)
+
+Click New to add 
+1. inventory or pos
+
+======================
+
+Create User table "users" (data storage of users - columns and rows)
+User property     Name         Type           Length/Values   Default     AI
+* ID                 - id                INT                                    None      PRIMARY    check
+* First name     - first_name   VARCHAR     50                   None
+* Last name      - last_name   VARCHAR     50                   None
+* Password       - password    VARCHAR     50                   None
+* Email             - email           VARCHAR    50                   None
+* Created at      - created_at   DATETIME                          None
+* Updated at     - updated_at   DATETIME                         None
+Then click save
+
+Add a user by clicking the Insert button 
+id -       first name - last name - password - email                      - created at    - updated at
+empty - Jiffen          Gales          1530oftz    jiffengal@gmail.com   jan 18, 2024   jan 18, 2024
+
+=======================
+
+Create Product table by clicking pos/inventory databse from the right (Table name - products and number of columns - 5)
+Prod property     Name              Type           Length/Values  Default     AI
+ID                  -  id                    INT                                    None       PRIMARY   check
+Product           - product_name  VARCHAR     191                 None      
+Creator           - created_by       INT                                    None
+Creation          - created_at       DATETIME                          None  
+Updates          - updated_at       DATETIME                          None
+
+Then click Relation View button
+Constraint Properties = fk_user
+On Delete                 = RESTRICT
+On Update                = RESTRICT
+Column                    = created_by
+Database                  = inventory or pos
+Table                       = users
+Column                    = id
+
+The add manually the description below - Add 1 columns(s) after "product_name"
+Name - description
+Type  - VARCHAR
+Length/Values  - 200
+Default  - Null
+Null Index  - check
+Then save
+
+Add also manually the price - Add 1 columns(s) after "description"
+Name - price
+Type  - INT
+Length/Values  - 20
+Default  - Null
+Null Index  - check
+Then save  
+ON LATEST UPDATE = NO NEED FOR THIS COLUMN (price)
+
+Add also the image column after the "description"
+Name: img
+Type: VARCHAR
+Length/Values: 100 
+Default: NULL
+Collation: utf8mb4_general_ci
+Null: check
+
+In the products table - lets add a column after the img
+Click products table - head to structure then Add 1 below after img then click Go
+Create Column
+           Name: stock
+           Type: INT 
+           Default: None
+Click Save
+
+=======================
+
+Create Supplier table (suppliers) - same procedure with products table
+Supplier property        Name                  Type         Length/Values   Default     AI
+ID                            -  id                       INT                                   None      PRIMARY   check
+Name                       -  supplier_name     VARCHAR  191                  None
+Location                   -  supplier_location   VARCHAR  191                  None 
+Email                       -  email                   VARCHAR   100                 None
+Creator                    -  created_by           INT                                  None
+Creation                   -  created_at            DATETIME                        None
+Updates                   -  updated_at            DATETIME                        None
+
+Then click Relation View button
+Constraint Properties = fk_created_by
+On Delete                 = RESTRICT
+On Update                = RESTRICT
+Column                    = created_by
+Database                  = inventory or pos
+Table                       = users
+Column                    = id
+
+Optional: if created table was named as supplier then update table name to suppliers using the SQL alter function
+
+ALTER TABLE supplier RENAME suppliers;
+
+========================
+LATEST UPDATE == NO NEED FOR THIS TABLE
+
+Create Stocks table (in different way) - Click pos database - click SQL button - input command on the box
+
+CREATE TABLE stocks (
+        id INTEGER,
+        created_by INTEGER,
+        quantity INTEGER,
+        created_at DATETIME,
+        updated_at DATETIME,
+
+        PRIMARY KEY (id),
+        FOREIGN KEY (created_by)  REFERENCES users(id)
+);
+
+After that add the product_id manually after the product_id
+
+Then check Relation View button
+Constraint Properties = stocks_ibfk_1
+On Delete                 = RESTRICT
+On Update                = RESTRICT
+Column                    = created_by
+Database                  = inventory or pos
+Table                       = users
+Column                    = id
+
+And create a new constraint by click +Add constraint below
+constraint properties  = just leave empty
+On Delete                 = RESTRICT
+On Update                = RESTRICT
+Column                    = product_id
+Database                  = inventory or pos
+Table                       = products
+Column                    = id
+
+========================
+
+Create Order Product table (same way as Stocks table created) - Click pos/inventory database - SQL - input comm.
+
+CREATE TABLE order_product (
+        id INTEGER,
+        supplier INTEGER,
+        product INTEGER,
+        quantity_ordered INTEGER,
+        quantity_received INTEGER,
+        quantity_remaining INTEGER,
+        status VARCHAR (20),
+        created_by INTEGER,
+        created_at DATETIME,
+        updated_at DATETIME,
+
+        PRIMARY KEY (id),
+        FOREIGN KEY (supplier)  REFERENCES suppliers (id),
+        FOREIGN KEY (product)  REFERENCES products (id),
+        FOREIGN KEY (created_by)  REFERENCES users (id)
+);
+
+Then check Relation View button
+Constraint Properties 
+order_product_ibfk_1 
+ON DELETE: RESTRICT
+ON UPDATE: RESTRICT
+Column: supplier
+DB: invent
+Table: suppliers
+Column: id
+
+order_product_ibfk_2
+ON DELETE: RESTRICT
+ON UPDATE: RESTRICT
+Column: product
+DB: invent
+Table: products
+Column: id
+
+order_product_ibfk_3
+ON DELETE: RESTRICT
+ON UPDATE: RESTRICT
+Column: created_by
+DB: invent
+Table: users
+Column: id
+
+
+========================
+
+Create another table by clicking New button from the left inside the pos/inventory database then click structure above and type in the input filled below.
+
+Table Name - productsuppliers
+Number of Columns - 5
+
+Columns should have 
+Name          Type           Default   AI
+id                INT             None     PRIMARY - check
+supplier       INT             None
+product        INT             None
+updated_at   DATETIME   None
+created_at    DATETIME   None
+Then save
+
+Now add Relation View in the structure button above
+Constraint name - just leave it empty, it will create automatically to 'productsuppliers_ibfk_1' after saving
+ON DELETE - RESTRICT
+ON UPDATE - RESTRICT
+Column - product
+Datebase - pos/inventory
+Table - products
+Column - id
+Then save
+
+Now add another by clicking the +Add constraint below
+Constraint name - leave empty will automatically to 'productsuppliers_ibfk_2' after saving
+ON DELETE and ON UPDATE - RESTRICT (same)
+Column - supplier
+Database - pos/inventory
+Table - suppliers
+Column - id
+Then save
+
+
+========================
+
+Now Add new table 'order_product_history'
+
+Records every transactions - when stocks arrive
+
+Add product quantity
+- to main product table - qty
+- to batch table (aggregate)
+
+When saving, make sure the qty is set to 0
+- if it is zero, we don't include in saving
+
+Start here
+Click the pos/inventory from the left
+Type in the table name input field below
+Table name: order_product_history
+Number of columns: 5
+Then Create
+
+Create a new table with 5 columns
+- Connects row id to the new table
+- id, order_product_id, qty_receive, date_received, date_updated
+
+ID = Name - id,                        Type - INT,            Default - None   AI - check (PRIMARY)
+OP = Name - order_product_id, Type - INT,            Default - None
+QR = Name - qty_received,       Type - INT,            Default - None
+DR = Name - date_receive,       Type - DATETIME,  Default - None
+DU = Name - date_updated,      Type - DATETIME,  Default - None
+
+Then Add Relation View
+Constraint Properties = Just leave it empty - it will automatically add constraint properties order_product_history_ibfk_1 after it created.
+On Delete                 = RESTRICT
+On Update                = RESTRICT
+Column                    = order_product_id
+Database                  = inventory or pos
+Table                       = order_product
+Column                    = id
+
+=======================
+
+Now lets drop the Stocks table in the database since we cannot use this.
+Click inventory or pos - in the structure column mark check the stocks and then drop.
+
+Note: Nothing to drop when table is not created
+=======================
+
+
+=======================
+
+
+
+
+
+
+
+
+
+
+
